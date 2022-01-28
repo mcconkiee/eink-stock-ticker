@@ -7,8 +7,8 @@ from lib.chart import quickchart
 from lib.rapid_chart import get_chart
 from PIL import Image, ImageDraw, ImageFont
 fnt = "fonts/Arial Black.ttf"
-tx_clr = "white"
-bg_clr = "black"
+tx_clr = (0, 0, 0)
+bg_clr = (255, 255, 255)
 lg = 100
 sm = 30
 padding = 10
@@ -16,18 +16,19 @@ width = 500
 height = 200
 
 symbols = ["VIX","AAPL","SPY"]
+# symbols = ["VIX"]
 for symbol in symbols:
     if symbol == "VIX":
         symbol = f"^{symbol}"
     print(f"fetching symbol data•••: {symbol}")
     # can get symbls like "MSFT" or "^VIX" (note the karat)
-    vix = get_symbol(symbol=symbol)
+    quote = get_symbol(symbol=symbol)
     history = get_history(symbol=symbol)
     # remove the karat if we have one
     symbol = symbol.replace("^","")
-    print(f"SYMBOL: {json.dumps(vix.info)}")
-    cur_price = float(vix.info.get('regularMarketPrice'))
-    lst_price = float(vix.info.get('previousClose'))
+    # print(f"SYMBOL: {json.dumps(quote.info)}")
+    cur_price = float(quote.info.get('regularMarketPrice'))
+    lst_price = float(quote.info.get('previousClose'))
 
     is_up = cur_price > lst_price
     price_diff = float(cur_price - lst_price) if is_up else float(lst_price - cur_price)
@@ -55,13 +56,12 @@ for symbol in symbols:
     d.text((x + padding, y+((sm + padding) * 2)), prcnt_w_symbol, fill=tx_clr, anchor="ms", font=font_sm)
 
     # create chart
-    chart_img = quickchart(width=int(width/5),height=int(height/2),dataset=history["Open"])
+    chart_img = quickchart(width=int(width/5),height=int(height/2),dataset=history["Open"],background_clr=f"rgb{bg_clr}",line_clr=f"rgb{tx_clr}")
     # get chart image
-    chart = Image.open('imgs/chart.png').convert("L")
-    rapid_chart = get_chart(symbol="VIX")
-    print(f"rapid chart = {rapid_chart}")
+    chart = Image.open('imgs/chart.png').convert("RGBA")
+    
     back_im = im.copy()
-    back_im.paste(chart,(round(width/1.75), 0))
+    back_im.paste(chart,(round(width/1.75), 0),mask=chart)
     back_im.save('imgs/quote.png', quality=95)
     back_im.save(f"imgs/{symbol}.png", quality=95)
 

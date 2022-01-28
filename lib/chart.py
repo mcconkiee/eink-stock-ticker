@@ -3,7 +3,7 @@ from typing import List
 from quickchart import QuickChart
 
 
-def quickchart(width: int, height: int, dataset: List[float]):
+def quickchart(width: int, height: int, dataset: List[float],background_clr:str = "0x000000",line_clr:str = "rgb(255,255,255)"):
     qc = QuickChart()
     qc.width = width
     qc.height = height
@@ -22,8 +22,8 @@ def quickchart(width: int, height: int, dataset: List[float]):
             "labels": labels,
             "datasets": [
                 {
-                    "backgroundColor": '0x00000',
-                    "borderColor": 'rgb(255, 255, 255)',
+                    "backgroundColor": background_clr,
+                    "borderColor": line_clr,
                     "borderWidth":1,
                     "data": pt,
                     "fill": False,
