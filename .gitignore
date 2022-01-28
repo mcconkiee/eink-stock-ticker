@@ -1,0 +1,4 @@
+.env
+imgs/*
+!imgs/quote.png
+*/__pycache__

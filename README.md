@@ -17,4 +17,7 @@ This is my first go at a display on a raspberry pi. The goal is to display a rea
 mkvirtualenv -p python3.9 vix
 workon vix
 pip install -r requirements.txt
+python3 ./drawing.py && open imgs/quote.png
+pip uninstall pandas
+pip install pandas==1.3.5
 ```
