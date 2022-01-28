@@ -9,6 +9,7 @@ lg = 100
 sm = 30
 padding = 10
 symobl = "VIX"
+# can get symbls like "MSFT" or "^VIX" (note the karat)
 # vix = get_symbol("^VIX")
 # price = f"${vix.info.get('regularMarketPrice')}"
 # print(f"SYMBOL: {json.dumps(vix.info)}")
