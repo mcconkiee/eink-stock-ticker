@@ -1,5 +1,5 @@
 # ePaper + Pi
-
+![quote.png](imgs/quote.png)
 ## Goal
 This is my first go at a display on a raspberry pi. The goal is to display a real time quote of the `VIX` ticker and show the results on an eink display
 
@@ -21,3 +21,4 @@ python3 ./drawing.py && open imgs/quote.png
 pip uninstall pandas
 pip install pandas==1.3.5
 ```
+
