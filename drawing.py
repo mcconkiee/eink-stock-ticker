@@ -2,6 +2,13 @@
 # import sys
 # sys.path.insert(1, "./lib") # Adds lib folder in this directory to sys
 
+import sys
+import os
+srcdir = os.path.dirname(os.path.realpath(__file__))
+fontdir = os.path.join(srcdir,"fonts")
+imgsdir = os.path.join(srcdir,"imgs")
+
+
 # import lib.epd2in7b
 from lib.epd2in7 import EPD
 import json
@@ -14,9 +21,11 @@ from lib.chart import quickchart
 from lib.rapid_chart import get_chart
 from PIL import Image, ImageDraw, ImageFont
 
-logging.basicConfig(level=logging.DEBUG)
 
-fnt = "fonts/Arial Black.ttf"
+logging.basicConfig(level=logging.INFO)
+
+fnt = os.path.join(fontdir, 'Arial Black.ttf')
+
 tx_clr = 0
 bg_clr = 255
 
@@ -64,13 +73,14 @@ def update_msgs(msg:str,submsg:str = None,subsubmsg:str=None,display:bool=False)
     return im
 
 
-# symbols = ["VIX","AAPL","SPY"]
-symbols = ["VIX"]
+symbols = ["VIX","AAPL","SPY"]
+# symbols = ["VIX"]
 for symbol in symbols:
     if symbol == "VIX":
         symbol = f"^{symbol}"
     orig_symbol = symbol.replace("^","")
-    update_msgs(msg=orig_symbol,submsg="...updating",display=True)
+    if len(symbols) == 1:
+        update_msgs(msg=orig_symbol,submsg="...updating",display=True)
     logging.info(f"fetching symbol data•••: {symbol}")
     # can get symbls like "MSFT" or "^VIX" (note the karat)
     quote = get_symbol(symbol=symbol)    
@@ -104,15 +114,23 @@ for symbol in symbols:
     
     logging.info("creating chart image")
     # create chart
-    chart_img = quickchart(width=int(width),height=int(height/2),dataset=history["Open"],background_clr=f"rgb({bg_clr},{bg_clr},{bg_clr})",line_clr=f"rgb({tx_clr},{tx_clr},{tx_clr})")    
+    chart_img = quickchart(
+        width=int(width),
+        height=int(height/2.5),
+        dataset=history["Open"],
+        background_clr=f"rgb({bg_clr},{bg_clr},{bg_clr})",
+        line_clr=f"rgb({tx_clr},{tx_clr},{tx_clr})",
+        saved_image_path=os.path.join(imgsdir,"chart.png"))    
     # get chart image
-    chart = Image.open('imgs/chart.png') #.convert("RGBA")    
+    
+    chart = Image.open(os.path.join(imgsdir,"chart.png")) #.convert("RGBA")    
     back_im = im.copy()
-    back_im.paste(chart,(5, 100),mask=chart)
-    back_im.save('imgs/quote.png', quality=95)
-    back_im.save(f"imgs/{symbol}.png", quality=95)
+    back_im.paste(chart,(5, 50),mask=chart)
+    back_im.save(os.path.join(imgsdir,"quote.png"), quality=95)
+    
+    back_im.save(os.path.join(imgsdir,f"{symbol}.png"), quality=95)
 
     logging.info("Display quote {symbol}")
     epd.display(epd.getbuffer(back_im))
-    
+    time.sleep(20)
 

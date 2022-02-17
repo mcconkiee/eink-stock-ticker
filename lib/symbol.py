@@ -21,7 +21,7 @@ def get_symbol(symbol:str):
     # vix.news
     return vix
 
-def get_history(symbol:str,interval:str = "15m",period:str="1d"):
+def get_history(symbol:str,interval:str = "5m",period:str="1d"):
     x=datetime.now()
     date_N_days_ago = datetime.now() - timedelta(days=1)
     fmt_start = date_N_days_ago.strftime("%Y"+"-"+"%m"+"-"+"%d")
@@ -36,6 +36,6 @@ def get_history(symbol:str,interval:str = "15m",period:str="1d"):
     # 2022-01-28 09:35:00-05:00  296.010010  296.040009  293.750000  294.920013  435657          0             0
     # 2022-01-28 09:40:00-05:00  295.000000  295.599915  294.019989  294.283997  323249          0             0
     tickr = yf.Ticker(symbol)  
-    # history = tickr.history(period=period,interval=interval)
-    history = tickr.history(start=fmt_start,end=fmt_end,interval=interval)    
+    history = tickr.history(period=period,interval=interval)
+    # history = tickr.history(start=fmt_start,end=fmt_end,interval=interval)        
     return history
