@@ -1,8 +1,10 @@
 import json
+import logging
 from typing import List
 from quickchart import QuickChart
 
-
+logging.basicConfig(level=logging.DEBUG)
+border_width = 2
 def quickchart(width: int, height: int, dataset: List[float],background_clr:str = "0x000000",line_clr:str = "rgb(255,255,255)"):
     qc = QuickChart()
     qc.width = width
@@ -24,7 +26,7 @@ def quickchart(width: int, height: int, dataset: List[float],background_clr:str 
                 {
                     "backgroundColor": background_clr,
                     "borderColor": line_clr,
-                    "borderWidth":1,
+                    "borderWidth":border_width,
                     "data": pt,
                     "fill": False,
                     "radius":0,
@@ -51,10 +53,10 @@ def quickchart(width: int, height: int, dataset: List[float],background_clr:str 
     }
 
     # Print a chart URL
-    # print(qc.get_url())
+    logging.debug(f"\r\n{qc.get_url()}")
 
     # Print a short chart URL
-    print(qc.get_short_url())
+    logging.debug(qc.get_short_url())
     # Write a file
     qc.to_file('imgs/chart.png')
 
