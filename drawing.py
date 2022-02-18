@@ -47,19 +47,18 @@ sm = int(height/13)
 padding = 0
 
 
-def update_msgs(msg:str,submsg:str = None,subsubmsg:str=None,display:bool=False):
+def update_msgs(msg:str,submsg:str = None,subsubmsg:str=None,display:bool=False,x:float=None,y:float=None):
     font = ImageFont.truetype(fnt, lg if len(msg)<=3 else int(lg * .75))
     font_sm = ImageFont.truetype(fnt, sm)    
     im = Image.new("1", (width,height), bg_clr)
     d = ImageDraw.Draw(im)
     w, h = d.textsize(msg, font=font)
     
-    x = width/2 - w/4 # 0 = left, width = right
-    y = height - 30 #0 = top, height = bottom
+    if x == None:
+        x = width/2 - w/4 # 0 = left, width = right
+    if y == None:
+        y = height - 30 #0 = top, height = bottom
     
-    logging.info("∞∞∞∞∞∞∞∞∞∞∞∞∞Quote X Y Position∞∞∞∞∞∞∞∞∞∞∞∞∞")
-    logging.info(f"\r\ntextsize w = {w}\r\nh = {h}")
-    logging.info(f"\r\nx = {x} \r\ny = {y}")
 
     d.text((x,y), msg, fill=tx_clr, anchor="ms", font=font)
     if submsg:
@@ -75,15 +74,14 @@ def display_symbol(symbol:str):
     if symbol == "VIX":
         symbol = f"^{symbol}"
     orig_symbol = symbol.replace("^","")
-    if len(symbols) == 1:
-        update_msgs(msg=orig_symbol,submsg="...updating",display=True)
-    logging.info(f"fetching symbol data•••: {symbol}")
+    # update_msgs(msg=orig_symbol,submsg=f"...updating",display=True)    
     # can get symbls like "MSFT" or "^VIX" (note the karat)
     quote = get_symbol(symbol=symbol)    
     history = get_history(symbol=symbol)
-    logging.debug(f"QUOTE•••:\r\n {quote}\r\n{history}")
 
-    # remove the karat if we have one
+    
+    
+    # remove the karat if we have one (eg ^VIX)
     symbol = orig_symbol
     # print(f"SYMBOL: {json.dumps(quote.info)}")
     cur_price = float(quote.info.get('regularMarketPrice'))
@@ -106,7 +104,14 @@ def display_symbol(symbol:str):
     font = ImageFont.truetype(fnt, lg if len(symbol)<=3 else int(lg * .75))
     font_sm = ImageFont.truetype(fnt, sm)    
 
-    im = update_msgs(symbol,price,prcnt_w_symbol)
+    # get prices to understand where is the chart line
+    first_price = history["Open"][0]
+    last_price = history["Open"][-1]
+    length = history["Open"].shape[0]
+    mid_price_idx = round(length/2)
+    mid_price = history["Open"][mid_price_idx]
+    yvalue = (height + (height - 50) if mid_price < first_price  else height - 50)
+    im = update_msgs(msg=symbol,submsg=price,subsubmsg=prcnt_w_symbol,y=yvalue)
     
     logging.info("creating chart image")
     # create chart
