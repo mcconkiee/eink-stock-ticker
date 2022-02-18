@@ -13,7 +13,7 @@ imgsdir = os.path.join(srcdir,"imgs")
 from lib.epd2in7 import EPD
 import json
 import logging
-import time
+from time import time, sleep
 from turtle import width
 from lib.iex import fetch_quote
 from lib.symbol import get_history, get_symbol
@@ -71,10 +71,7 @@ def update_msgs(msg:str,submsg:str = None,subsubmsg:str=None,display:bool=False)
         epd.display(epd.getbuffer(im))
     return im
 
-
-symbols = ["VIX","AAPL","SPY"]
-# symbols = ["VIX"]
-for symbol in symbols:
+def display_symbol(symbol:str):
     if symbol == "VIX":
         symbol = f"^{symbol}"
     orig_symbol = symbol.replace("^","")
@@ -131,7 +128,15 @@ for symbol in symbols:
     back_im.save(os.path.join(imgsdir,f"{symbol}.png"), quality=95)
 
     logging.info("Display quote {symbol}")
-    epd.display(epd.getbuffer(back_im))
-    time.sleep(10)
+    epd.display(epd.getbuffer(back_im))    
 
-
+symbols = ["VIX","AAPL","SPY"]
+counter  = 0
+while True:
+    logging.info("fetching ")
+    symbol = symbols[counter]
+    logging.info(f"{symbol}••")
+    display_symbol(symbol=symbol)
+    counter = (counter + 1) 
+    idx = counter % len(symbols)
+    sleep(60 - time() % 60)
