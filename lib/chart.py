@@ -5,7 +5,7 @@ from quickchart import QuickChart
 
 logging.basicConfig(level=logging.DEBUG)
 border_width = 2
-def quickchart(width: int, height: int, dataset: List[float],background_clr:str = "0x000000",line_clr:str = "rgb(255,255,255)",saved_image_path:str=None):
+def quickchart(width: int, height: int, dataset: List[float],background_clr:str = "0x000000",line_clr:str = "rgb(240,240,240)",saved_image_path:str=None):
     qc = QuickChart()
     qc.width = width
     qc.height = height

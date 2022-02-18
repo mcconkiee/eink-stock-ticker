@@ -38,12 +38,12 @@ epd.Clear(0xFF)
 
 # these are flipped on purpose
 width = epd.height
-height = epd.width
+height = epd.width 
 logging.info(f"§¶¶¶§§§§§§§§§§§§")
 logging.info(f"\r\n{width} = width \r\n {height} =  height")
 logging.info(f"§¶¶¶§§§§§§§§§§§§")
-lg = int(height/3)
-sm = int(height/8)
+lg = int(height/8)
+sm = int(height/13)
 padding = 0
 
 
@@ -53,10 +53,9 @@ def update_msgs(msg:str,submsg:str = None,subsubmsg:str=None,display:bool=False)
     im = Image.new("1", (width,height), bg_clr)
     d = ImageDraw.Draw(im)
     w, h = d.textsize(msg, font=font)
-    # smaller value == more left 
-    x = w * .75
-    # smaller value == more down
-    y = h * .75    
+    
+    x = width/2 - w/4 # 0 = left, width = right
+    y = height - 30 #0 = top, height = bottom
     
     logging.info("∞∞∞∞∞∞∞∞∞∞∞∞∞Quote X Y Position∞∞∞∞∞∞∞∞∞∞∞∞∞")
     logging.info(f"\r\ntextsize w = {w}\r\nh = {h}")
@@ -114,23 +113,25 @@ for symbol in symbols:
     
     logging.info("creating chart image")
     # create chart
+    lt_gray = tx_clr - 40
     chart_img = quickchart(
-        width=int(width),
-        height=int(height/2.5),
+        width=int(width/2),
+        height=int(height/2),
         dataset=history["Open"],
         background_clr=f"rgb({bg_clr},{bg_clr},{bg_clr})",
-        line_clr=f"rgb({tx_clr},{tx_clr},{tx_clr})",
+        line_clr=f"rgb({lt_gray},{lt_gray},{lt_gray})",
         saved_image_path=os.path.join(imgsdir,"chart.png"))    
     # get chart image
     
     chart = Image.open(os.path.join(imgsdir,"chart.png")) #.convert("RGBA")    
     back_im = im.copy()
-    back_im.paste(chart,(5, 50),mask=chart)
+    back_im.paste(chart,(1, 1),mask=chart)
     back_im.save(os.path.join(imgsdir,"quote.png"), quality=95)
     
     back_im.save(os.path.join(imgsdir,f"{symbol}.png"), quality=95)
 
     logging.info("Display quote {symbol}")
     epd.display(epd.getbuffer(back_im))
-    time.sleep(20)
+    time.sleep(10)
+
 
