@@ -42,8 +42,8 @@ height = epd.width
 logging.info(f"§¶¶¶§§§§§§§§§§§§")
 logging.info(f"\r\n{width} = width \r\n {height} =  height")
 logging.info(f"§¶¶¶§§§§§§§§§§§§")
-lg = int(height/8)
-sm = int(height/13)
+lg = int(height/5)
+sm = int(height/10)
 padding = 0
 
 
@@ -55,7 +55,7 @@ def update_msgs(msg:str,submsg:str = None,subsubmsg:str=None,display:bool=False,
     w, h = d.textsize(msg, font=font)
     
     if x == None:
-        x = width/2 - w/4 # 0 = left, width = right
+        x = width/2  # 0 = left, width = right
     if y == None:
         y = height - 30 #0 = top, height = bottom
     
@@ -110,7 +110,7 @@ def display_symbol(symbol:str):
     length = history["Open"].shape[0]
     mid_price_idx = round(length/2)
     mid_price = history["Open"][mid_price_idx]
-    yvalue = (height + (height - 50) if mid_price < first_price  else height - 50)
+    yvalue = (30 if mid_price < first_price  else height - 40)
     im = update_msgs(msg=symbol,submsg=price,subsubmsg=prcnt_w_symbol,y=yvalue)
     
     logging.info("creating chart image")
@@ -137,11 +137,13 @@ def display_symbol(symbol:str):
 
 symbols = ["VIX","AAPL","SPY"]
 counter  = 0
+idx = 0
 while True:
     logging.info("fetching ")
-    symbol = symbols[counter]
+    symbol = symbols[idx]
     logging.info(f"{symbol}••")
     display_symbol(symbol=symbol)
     counter = (counter + 1) 
     idx = counter % len(symbols)
-    sleep(60 - time() % 60)
+    logging.info(f"counter = {counter}\r\nidx = {idx}\r\n{len(symbols)}")
+    sleep(30 - time() % 30)
