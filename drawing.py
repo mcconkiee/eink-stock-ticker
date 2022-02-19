@@ -11,6 +11,7 @@ imgsdir = os.path.join(srcdir,"imgs")
 
 # import lib.epd2in7b
 from lib.epd2in7 import EPD
+from lib.tickers import Tickers
 import json
 import logging
 from time import time, sleep
@@ -135,7 +136,11 @@ def display_symbol(symbol:str):
     logging.info("Display quote {symbol}")
     epd.display(epd.getbuffer(back_im))    
 
-symbols = ["VIX","AAPL","SPY"]
+
+t = Tickers()
+data = t.get_tickers()
+
+symbols = data['tickers']
 counter  = 0
 idx = 0
 while True:
