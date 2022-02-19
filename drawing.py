@@ -137,10 +137,12 @@ def display_symbol(symbol:str):
     epd.display(epd.getbuffer(back_im))    
 
 
-t = Tickers()
-data = t.get_tickers()
+def get_tickers():
+    t = Tickers()
+    data = t.get_tickers()
+    return data
 
-symbols = data['tickers']
+symbols = get_tickers()
 counter  = 0
 idx = 0
 while True:
@@ -151,4 +153,6 @@ while True:
     counter = (counter + 1) 
     idx = counter % len(symbols)
     logging.info(f"counter = {counter}\r\nidx = {idx}\r\n{len(symbols)}")
+    if counter % 10 == 0:
+        symbols = get_tickers()
     sleep(30 - time() % 30)
