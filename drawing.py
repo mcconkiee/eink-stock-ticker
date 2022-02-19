@@ -27,8 +27,8 @@ logging.basicConfig(level=logging.INFO)
 
 fnt = os.path.join(fontdir, 'Arial Black.ttf')
 
-chart_clr = 0x77 #https://www.color-hex.com
-tx_clr = 0x99
+chart_clr = 0xaa #https://www.color-hex.com
+tx_clr = 0
 bg_clr = 255
 
 
@@ -41,11 +41,8 @@ epd.Clear(0xFF)
 # these are flipped on purpose
 width = epd.height
 height = epd.width 
-logging.info(f"§¶¶¶§§§§§§§§§§§§")
-logging.info(f"\r\n{width} = width \r\n {height} =  height")
-logging.info(f"§¶¶¶§§§§§§§§§§§§")
 lg = int(height/2)
-sm = int(height/4)
+sm = int(height/8)
 padding = 0
 
 
@@ -110,7 +107,7 @@ def display_symbol(symbol:str):
     mid_price_idx = round(length/2)
     mid_price = history["Open"][mid_price_idx]
     # yvalue = (30 if mid_price < first_price  else height - 40)
-    im = update_msgs(msg=symbol,submsg=price,subsubmsg=prcnt_w_symbol,y=75)
+    im = update_msgs(msg=symbol,submsg=price,subsubmsg=prcnt_w_symbol,y=100)
     
     # create chart
     
