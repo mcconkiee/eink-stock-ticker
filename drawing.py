@@ -10,7 +10,7 @@ imgsdir = os.path.join(srcdir,"imgs")
 
 
 # import lib.epd2in7b
-from lib.epd2in7 import EPD
+from lib.epd2in7 import EPD,GRAY3
 import json
 import logging
 from time import time, sleep
@@ -26,13 +26,14 @@ logging.basicConfig(level=logging.INFO)
 
 fnt = os.path.join(fontdir, 'Arial Black.ttf')
 
-tx_clr = 0
+chart_clr = 0x77 #https://www.color-hex.com
+tx_clr = 0x99
 bg_clr = 255
 
 
 
 epd = EPD() # get the display
-epd.init()           # initialize the display
+epd.Init_4Gray()           # initialize the display
 logging.info("Clear display")    # prints to console, not the display, for debugging
 epd.Clear(0xFF)  
 
@@ -42,15 +43,15 @@ height = epd.width
 logging.info(f"§¶¶¶§§§§§§§§§§§§")
 logging.info(f"\r\n{width} = width \r\n {height} =  height")
 logging.info(f"§¶¶¶§§§§§§§§§§§§")
-lg = int(height/5)
-sm = int(height/10)
+lg = int(height/2)
+sm = int(height/4)
 padding = 0
 
 
 def update_msgs(msg:str,submsg:str = None,subsubmsg:str=None,display:bool=False,x:float=None,y:float=None):
     font = ImageFont.truetype(fnt, lg if len(msg)<=3 else int(lg * .75))
     font_sm = ImageFont.truetype(fnt, sm)    
-    im = Image.new("1", (width,height), bg_clr)
+    im = Image.new("L", (width,height), bg_clr)
     d = ImageDraw.Draw(im)
     w, h = d.textsize(msg, font=font)
     
@@ -67,7 +68,7 @@ def update_msgs(msg:str,submsg:str = None,subsubmsg:str=None,display:bool=False,
         d.text((x + padding, y+((sm + padding) * 2)), subsubmsg, fill=tx_clr, anchor="ms", font=font_sm)
     if display:
         epd.Clear(0xFF)  
-        epd.display(epd.getbuffer(im))
+        epd.display_4Gray(epd.getbuffer(im))
     return im
 
 def display_symbol(symbol:str):
@@ -78,8 +79,6 @@ def display_symbol(symbol:str):
     # can get symbls like "MSFT" or "^VIX" (note the karat)
     quote = get_symbol(symbol=symbol)    
     history = get_history(symbol=symbol)
-
-    
     
     # remove the karat if we have one (eg ^VIX)
     symbol = orig_symbol
@@ -97,7 +96,6 @@ def display_symbol(symbol:str):
     prcnt_w_symbol = f"{plus_minus}{price_diff} {plus_minus}{prcnt}%"
     # price = f"${cur_price} (${lst_price})"
     price = f"${cur_price}"
-    logging.info(f"••••••••••••••••SYMBOL DATA••••••••••••••••••••••")
     logging.info(f"{symbol} @  ${price} {prcnt_w_symbol}")
 
     # DRAW
@@ -110,18 +108,17 @@ def display_symbol(symbol:str):
     length = history["Open"].shape[0]
     mid_price_idx = round(length/2)
     mid_price = history["Open"][mid_price_idx]
-    yvalue = (30 if mid_price < first_price  else height - 40)
-    im = update_msgs(msg=symbol,submsg=price,subsubmsg=prcnt_w_symbol,y=yvalue)
+    # yvalue = (30 if mid_price < first_price  else height - 40)
+    im = update_msgs(msg=symbol,submsg=price,subsubmsg=prcnt_w_symbol,y=75)
     
-    logging.info("creating chart image")
     # create chart
-    lt_gray = tx_clr - 40
+    
     chart_img = quickchart(
         width=int(width/2),
         height=int(height/2),
         dataset=history["Open"],
         background_clr=f"rgb({bg_clr},{bg_clr},{bg_clr})",
-        line_clr=f"rgb({lt_gray},{lt_gray},{lt_gray})",
+        line_clr=f"rgb({chart_clr},{chart_clr},{chart_clr})",
         saved_image_path=os.path.join(imgsdir,"chart.png"))    
     # get chart image
     
@@ -133,7 +130,7 @@ def display_symbol(symbol:str):
     back_im.save(os.path.join(imgsdir,f"{symbol}.png"), quality=95)
 
     logging.info("Display quote {symbol}")
-    epd.display(epd.getbuffer(back_im))    
+    epd.display_4Gray(epd.getbuffer_4Gray(back_im))    
 
 symbols = ["VIX","AAPL","SPY"]
 counter  = 0
@@ -145,5 +142,4 @@ while True:
     display_symbol(symbol=symbol)
     counter = (counter + 1) 
     idx = counter % len(symbols)
-    logging.info(f"counter = {counter}\r\nidx = {idx}\r\n{len(symbols)}")
     sleep(30 - time() % 30)
