@@ -10,7 +10,8 @@ imgsdir = os.path.join(srcdir,"imgs")
 
 
 # import lib.epd2in7b
-from lib.epd2in7 import EPD,GRAY3
+from lib.epd2in7 import EPD
+from lib.tickers import Tickers
 import json
 import logging
 from time import time, sleep
@@ -132,14 +133,24 @@ def display_symbol(symbol:str):
     logging.info("Display quote {symbol}")
     epd.display_4Gray(epd.getbuffer_4Gray(back_im))    
 
-symbols = ["VIX","AAPL","SPY"]
+
+def get_tickers():
+    t = Tickers()
+    data = t.get_tickers()
+    return data['tickers']
+
+symbols = get_tickers()
 counter  = 0
 idx = 0
-while True:
-    logging.info("fetching ")
-    symbol = symbols[idx]
-    logging.info(f"{symbol}••")
-    display_symbol(symbol=symbol)
-    counter = (counter + 1) 
-    idx = counter % len(symbols)
-    sleep(30 - time() % 30)
+size = len(symbols)
+if size > 0:
+    while True:
+        logging.info("fetching ")
+        symbol = symbols[idx]
+        logging.info(f"{symbol}••")
+        display_symbol(symbol=symbol)
+        counter = (counter + 1) 
+        idx = counter % size        
+        if counter % 10 == 0:
+            symbols = get_tickers()
+        sleep(30 - time() % 30)
