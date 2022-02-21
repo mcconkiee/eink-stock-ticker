@@ -8,19 +8,21 @@ srcdir = os.path.dirname(os.path.realpath(__file__))
 fontdir = os.path.join(srcdir,"fonts")
 imgsdir = os.path.join(srcdir,"imgs")
 
+import json
+import logging
+import PIL
+from PIL import Image, ImageDraw, ImageFont
 
 # import lib.epd2in7b
 from lib.epd2in7 import EPD
 from lib.tickers import Tickers
-import json
-import logging
 from time import time, sleep
 from turtle import width
 from lib.iex import fetch_quote
 from lib.symbol import get_history, get_symbol
 from lib.chart import quickchart
 from lib.rapid_chart import get_chart
-from PIL import Image, ImageDraw, ImageFont
+
 
 
 logging.basicConfig(level=logging.INFO)
@@ -119,14 +121,19 @@ def display_symbol(symbol:str):
         line_clr=f"rgb({chart_clr},{chart_clr},{chart_clr})",
         saved_image_path=os.path.join(imgsdir,"chart.png"))    
     # get chart image
-    
+    # flip this image since we want the powersource on the bottom
+
     chart = Image.open(os.path.join(imgsdir,"chart.png")) #.convert("RGBA")    
     back_im = im.copy()
+    rotate = True
+    if rotate:
+        chart = chart.transpose(PIL.Image.ROTATE_180)
+        back_im = back_im.transpose(PIL.Image.ROTATE_180)
     back_im.paste(chart,(1, 1),mask=chart)
     back_im.save(os.path.join(imgsdir,"quote.png"), quality=95)
     
     back_im.save(os.path.join(imgsdir,f"{symbol}.png"), quality=95)
-
+    
     logging.info("Display quote {symbol}")
     epd.display_4Gray(epd.getbuffer_4Gray(back_im))    
 
