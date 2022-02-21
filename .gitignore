@@ -2,3 +2,4 @@
 imgs/*
 !imgs/quote.png
 */__pycache__
+__pycache__/
