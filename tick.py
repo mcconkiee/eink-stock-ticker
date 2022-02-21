@@ -97,7 +97,9 @@ class Tick:
             d.text((x + self.padding, y+((self.sm_font_size + self.padding) * 2)), subsubmsg, fill=tx_clr, anchor="ms", font=font_sm)
         if self.epd and display:
             self.epd.Clear(0xFF)  
-            self.epd.display_4Gray(self.epd.getbuffer(im))
+            if self.rotate_img:
+                im = im.transpose(PIL.Image.ROTATE_180)
+            self.epd.display_4Gray(self.epd.getbuffer_4Gray(im))
         return im
 
 
@@ -181,18 +183,16 @@ class Tick:
             self.display_symbol(symbol=symbol)
         except Exception as error:
             logging.DEBUG(f"error on symbol {symbol}")
-            self.update_msgs(symbol=symbol,submsg=error.message,subsubmsg="",display=True)
             sleep_time = 10
         self.counter = (self.counter + self.increment) 
         self.idx = self.counter % size 
         sleep(sleep_time - time() % sleep_time)
 
-    def tick(self):
+    def tick(self,loop = True):
         self.symbols = self.get_tickers()
         size = len(self.symbols)
         if size > 0:
-            while True:                
-                logging.info("fetching ")
+            while loop:                
                 self.refresh()
 
     
@@ -200,6 +200,8 @@ class Tick:
     # https://dev.to/ranewallin/getting-started-with-the-waveshare-2-7-epaper-hat-on-raspberry-pi-41m8
     # https://gist.github.com/RaneWallin/fd73ddbffdabea23358f722adb9f4075
     def handleBtnPress(self,btn):
+        
+        self.update_msgs(msg=" ",submsg="Updating...",subsubmsg=" ",display=True,y=self.screen_height / 2)
         if HAS_EPD:
             self.epd.Clear(0xFF)  
             pinNum = btn.pin.number                             
@@ -208,7 +210,7 @@ class Tick:
                 self.symbols = ["^VIX"]
             else:
                 if len(self.symbols) == 1:
-                    self.symbols = self.get_tickers()
+                    self.symbols = self.get_tickers()                
                 if pinNum == FWD:
                     self.increment = 1                    
                 if pinNum == BCKWRD:                    
@@ -221,7 +223,8 @@ class Tick:
             size = len(self.symbols)
             self.counter = (self.counter + self.increment) 
             self.idx = self.counter % size 
-            self.refresh() 
+        
+        self.refresh()
             
 
 
