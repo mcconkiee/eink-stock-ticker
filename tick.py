@@ -75,7 +75,7 @@ class Tick:
     
         self.lg_font_size = int(self.screen_height/2) #large font
         self.sm_font_size = int(self.screen_height/8) #small font
-
+        self.symbols = self.get_tickers()
 
     def update_msgs(self,msg:str,submsg:str = None,subsubmsg:str=None,display:bool=False,x:float=None,y:float=None):
         font = ImageFont.truetype(fnt, self.lg_font_size if len(msg)<=3 else int(self.lg_font_size * .75))
@@ -177,6 +177,7 @@ class Tick:
     def refresh(self):
         size = len(self.symbols)
         sleep_time = 30
+        logging.info(f"symbols at refresh = {self.symbols}: idx = {self.idx} : counter = {self.counter}")
         symbol = self.symbols[self.idx]
         logging.info(f"{symbol}••")
         try:
@@ -188,12 +189,8 @@ class Tick:
         self.idx = self.counter % size 
         sleep(sleep_time - time() % sleep_time)
 
-    def tick(self,loop = True):
-        self.symbols = self.get_tickers()
-        size = len(self.symbols)
-        if size > 0:
-            while loop:                
-                self.refresh()
+    def tick(self,loop = True):        
+        self.refresh()
 
     
 
@@ -202,29 +199,31 @@ class Tick:
     def handleBtnPress(self,btn):
         
         self.update_msgs(msg=" ",submsg="Updating...",subsubmsg=" ",display=True,y=self.screen_height / 2)
+        
         if HAS_EPD:
             self.epd.Clear(0xFF)  
             pinNum = btn.pin.number                             
             if pinNum == VIX:
                 self.counter  = 0
+                self.idx = 0
                 self.symbols = ["^VIX"]
             else:
-                if len(self.symbols) == 1:
-                    self.symbols = self.get_tickers()                
                 if pinNum == FWD:
                     self.increment = 1                    
                 if pinNum == BCKWRD:                    
                     self.increment = -1
-                if pinNum == RESET:  
-                    self.symbols = self.get_tickers()       
+                if pinNum == RESET: 
+                    self.rotate_img = not self.rotate_img
                     self.increment = 1
-                    self.counter = 0
+                    self.counter = 0            
             
-            size = len(self.symbols)
+            size = len(self.symbols)            
             self.counter = (self.counter + self.increment) 
             self.idx = self.counter % size 
         
         self.refresh()
+        if size == 1:
+            self.symbols = self.get_tickers()
             
 
 
