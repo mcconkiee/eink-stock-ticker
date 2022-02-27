@@ -17,7 +17,7 @@ from lib.iex import fetch_quote
 from lib.symbol import get_history, get_symbol
 from lib.chart import quickchart
 from lib.rapid_chart import get_chart
-
+SLEEPTIME = 25
 HAS_EPD = False
 if os.path.exists('/sys/'):
     HAS_EPD = True
@@ -25,7 +25,7 @@ if os.path.exists('/sys/'):
 
 # configs
 FWD = 5
-BCKWRD = 6
+DETAILS = 6
 RESET = 19
 VIX = 13
 chart_clr = 0xaa #https://www.color-hex.com
@@ -43,7 +43,7 @@ class Tick:
     symbols: list[str] = []
     
     # these are flipped on purpose
-    rotate_img = False
+    rotate_img = True
     screen_width = 498
     screen_height = 300
     lg_font_size = 15 #large font
@@ -56,8 +56,7 @@ class Tick:
     def __init__(self) -> None:    
         if HAS_EPD: 
             # setup epd
-            _epd = EPD() # get the display
-            self.rotate_img = True
+            _epd = EPD() # get the display            
             self.screen_width = _epd.height
             self.screen_height = _epd.width
             _epd.Init_4Gray()           # initialize the display
@@ -65,7 +64,7 @@ class Tick:
             _epd.Clear(0xFF)   
             self.epd = _epd
             self.btn1 = Button(FWD)
-            self.btn2 = Button(BCKWRD)
+            self.btn2 = Button(DETAILS)
             self.btn3 = Button(VIX)
             self.btn4 = Button(RESET)
             self.btn1.when_pressed = self.handleBtnPress
@@ -101,7 +100,6 @@ class Tick:
                 im = im.transpose(PIL.Image.ROTATE_180)
             self.epd.display_4Gray(self.epd.getbuffer_4Gray(im))
         return im
-
 
     def display_symbol(self,symbol:str):
         if symbol == "VIX":
@@ -165,7 +163,7 @@ class Tick:
         
         back_im.save(os.path.join(imgsdir,f"{symbol}.png"), quality=95)
         
-        logging.info("Display quote {symbol}")
+        logging.info(f"Display quote {symbol}")
         if self.epd:
             self.epd.display_4Gray(self.epd.getbuffer_4Gray(back_im))    
 
@@ -176,7 +174,7 @@ class Tick:
 
     def refresh(self):
         size = len(self.symbols)
-        sleep_time = 30
+        sleep_time = SLEEPTIME
         logging.info(f"symbols at refresh = {self.symbols}: idx = {self.idx} : counter = {self.counter}")
         symbol = self.symbols[self.idx]
         logging.info(f"{symbol}••")
@@ -188,6 +186,10 @@ class Tick:
         self.counter = (self.counter + self.increment) 
         self.idx = self.counter % size 
         sleep(sleep_time - time() % sleep_time)
+
+    def show_details(self):
+        symbol = self.symbols[self.idx]
+        im = self.update_msgs(msg=f"{symbol}",submsg="xx",subsubmsg="vv",y=100)
 
     def tick(self,loop = True):        
         self.refresh()
@@ -209,9 +211,10 @@ class Tick:
                 self.symbols = ["^VIX"]
             else:
                 if pinNum == FWD:
-                    self.increment = 1                    
-                if pinNum == BCKWRD:                    
-                    self.increment = -1
+                    self.increment = self.increment + 1                    
+                if pinNum == DETAILS:                    
+                    self.show_details()
+                    return
                 if pinNum == RESET: 
                     self.rotate_img = not self.rotate_img
                     self.increment = 1
