@@ -1,7 +1,8 @@
 #!/usr/bin/python
-
+import logging
 from time import sleep
 from tick import Tick
+logging.basicConfig(level=logging.INFO)
 try:
     t = Tick()    
     while True:

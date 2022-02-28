@@ -43,7 +43,7 @@ class Tick:
     symbols: list[str] = []
     
     # these are flipped on purpose
-    rotate_img = True
+    rotate_img = False
     screen_width = 498
     screen_height = 300
     lg_font_size = 15 #large font
@@ -102,12 +102,9 @@ class Tick:
         return im
 
     def display_symbol(self,symbol:str):
-        if symbol == "VIX":
-            symbol = f"^{symbol}"
-        orig_symbol = symbol.replace("^","")
-        # update_msgs(msg=orig_symbol,submsg=f"...updating",display=True)    
-        # can get symbls like "MSFT" or "^VIX" (note the karat)
         quote = get_symbol(symbol=symbol)    
+        orig_symbol = symbol.replace("^","")
+        
         history = get_history(symbol=symbol)
         
         # remove the karat if we have one (eg ^VIX)
@@ -181,26 +178,49 @@ class Tick:
         try:
             self.display_symbol(symbol=symbol)
         except Exception as error:
-            logging.DEBUG(f"error on symbol {symbol}")
+            logging.error(f"error on symbol {symbol}")
             sleep_time = 10
         self.counter = (self.counter + self.increment) 
         self.idx = self.counter % size 
         sleep(sleep_time - time() % sleep_time)
 
     def show_details(self):
+        font = ImageFont.truetype(fnt, self.sm_font_size)
+        im = Image.new("L", (self.screen_width, self.screen_height), bg_clr)
+        d = ImageDraw.Draw(im)
+        padding =  -20
+        # data
         symbol = self.symbols[self.idx]
-        im = self.update_msgs(msg=f"{symbol}",submsg="xx",subsubmsg="vv",y=100)
+        quote = get_symbol(symbol=symbol)    
+        orig_symbol = symbol.replace("^","")
+        info = quote.info
+        # copy
+        high = f"high: {info.get('fiftyTwoWeekHigh')}"
+        low = f"low: {info.get('fiftyTwoWeekLow')}"
+        msg = f"{orig_symbol}"
+        # size/dimensions
+        w_msg, h_msg = d.textsize(msg, font=font)
+        w_high, h_high = d.textsize(high, font=font)
+        w_low, h_low = d.textsize(low, font=font)        
+        # draw
+        d.text((w_msg + padding,h_msg), msg, fill=tx_clr, anchor="ms", font=font)
+        d.text((w_high + padding,h_msg + h_high), f"high: {high}", fill=tx_clr, anchor="ms", font=font)
+        d.text((w_low + padding,h_msg + h_high + h_low), f"low: {low}", fill=tx_clr, anchor="ms", font=font)
+        if self.epd :
+            self.epd.Clear(0xFF)  
+            if self.rotate_img:
+                im = im.transpose(PIL.Image.ROTATE_180)
+        self.epd.display_4Gray(self.epd.getbuffer_4Gray(im))
 
     def tick(self,loop = True):        
         self.refresh()
+        # self.show_details()
 
     
 
     # https://dev.to/ranewallin/getting-started-with-the-waveshare-2-7-epaper-hat-on-raspberry-pi-41m8
     # https://gist.github.com/RaneWallin/fd73ddbffdabea23358f722adb9f4075
     def handleBtnPress(self,btn):
-        
-        self.update_msgs(msg=" ",submsg="Updating...",subsubmsg=" ",display=True,y=self.screen_height / 2)
         
         if HAS_EPD:
             self.epd.Clear(0xFF)  
