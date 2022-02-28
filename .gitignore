@@ -1,5 +1,6 @@
 .env
 imgs/*
 !imgs/quote.png
+!imgs/arrow.png
 */__pycache__
 __pycache__/

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import logging
 from time import sleep
-from tick import Tick
+from lib.tick import Tick
 logging.basicConfig(level=logging.INFO)
 try:
     t = Tick()    

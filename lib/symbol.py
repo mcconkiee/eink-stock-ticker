@@ -2,7 +2,7 @@ import yfinance as yf
 from datetime import datetime, timedelta
 
 # gets a symbol lik "^VIX" or "TSLA"
-def get_symbol(symbol:str):
+def get_symbol(symbol:str) -> yf.Ticker:
     vix = yf.Ticker(symbol)
 
     # show financials

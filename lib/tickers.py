@@ -1,5 +1,5 @@
 import pandas as pd
-import requests
+
 
 class Tickers:
     def __init__(self) -> None:
