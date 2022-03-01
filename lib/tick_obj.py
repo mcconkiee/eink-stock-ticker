@@ -96,7 +96,7 @@ class TickObject:
         font = ImageFont.truetype(fnt, self.lg_font_size if len(
             msg) <= 3 else int(self.lg_font_size * .75))
         font_sm = ImageFont.truetype(fnt, self.sm_font_size)
-        im = Image.new("L", (self.screen_width, self.screen_height), bg_clr)
+        im = Image.new("L", (self.screen_width, self.screen_height), bg_clr)        
         d = ImageDraw.Draw(im)
         w, h = d.textsize(msg, font=font)
 
@@ -119,6 +119,7 @@ class TickObject:
             if self.rotate_img:
                 im = im.transpose(PIL.Image.ROTATE_180)
             self.epd.display_4Gray(self.epd.getbuffer_4Gray(im))
+        
         return im
 
     def display_symbol(self):
@@ -163,7 +164,7 @@ class TickObject:
         d = ImageDraw.Draw(im)
         detail_size = 15
         font = ImageFont.truetype(self.font, detail_size)         
-        next_width,next_height = 10,10
+        next_width,next_height = 10,2
         high = f"${self.current_symbol_data.info.get('fiftyTwoWeekHigh')}"
         low = f"${self.current_symbol_data.info.get('fiftyTwoWeekLow')}"
         # high
@@ -181,28 +182,24 @@ class TickObject:
         next_width = next_width + self.padding        
         d.text((next_width ,next_height), low, fill=self.color_text,  font=font)
         # create chart
-        chart_img = quickchart(
-            width=int(self.screen_width/2),
-            height=int(self.screen_height/2),
-            dataset=history["Open"],
-            background_clr=f"rgb({bg_clr},{bg_clr},{bg_clr})",
-            line_clr=f"rgb({chart_clr},{chart_clr},{chart_clr})",
-            saved_image_path=os.path.join(imgsdir, "chart.png"))
-        # get chart image
-        # flip this image since we want the powersource on the bottom
-
-        chart = Image.open(os.path.join(
-            imgsdir, "chart.png"))  # .convert("RGBA")
-        back_im = im.copy()
+        # quickchart(
+        #     width=int(self.screen_width/2),
+        #     height=int(self.screen_height/2),
+        #     dataset=history["Open"],
+        #     background_clr=f"rgb({bg_clr},{bg_clr},{bg_clr})",
+        #     line_clr=f"rgb({chart_clr},{chart_clr},{chart_clr})",
+        #     saved_image_path=os.path.join(imgsdir, "chart.png"))
+        # # get chart image
+        # # flip this image since we want the powersource on the bottom
+        # chart = Image.open(os.path.join(imgsdir, "chart.png"))
         if self.rotate_img:
-            chart = chart.transpose(PIL.Image.ROTATE_180)
-            back_im = back_im.transpose(PIL.Image.ROTATE_180)
-        
-        back_im.paste(chart, (1, 1), mask=chart)
+            # chart = chart.transpose(PIL.Image.ROTATE_180)
+            im = back_im.transpose(PIL.Image.ROTATE_180)
+        # chart.putalpha(65)
+        back_im = im.copy()
+        # back_im.paste(chart,mask=chart)
         
         back_im.save(os.path.join(imgsdir, "quote.png"), quality=95)
-
-        back_im.save(os.path.join(imgsdir, f"{symbol}.png"), quality=95)
 
         logging.info(f"Display quote {symbol}")
         if self.epd:
