@@ -178,9 +178,9 @@ class TickObject:
         w_high, h_high = d.textsize(high, font=font)
         arrow = arrow.transpose(PIL.Image.ROTATE_180)
         next_width = self.screen_width - (w_high + self.padding + arrow.size[0])
-        im.paste(arrow,(next_width - 15, next_height + 3), mask=arrow)
+        im.paste(arrow,(next_width - 15, next_height+2), mask=arrow)
         next_width = next_width + self.padding        
-        d.text((next_width ,next_height), low, fill=self.color_text,  font=font)
+        d.text((next_width ,next_height-3), low, fill=self.color_text,  font=font)
         # create chart
         # quickchart(
         #     width=int(self.screen_width/2),
