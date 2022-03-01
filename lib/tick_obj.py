@@ -21,7 +21,7 @@ SLEEPTIME = 25
 HAS_EPD = False
 if os.path.exists('/sys/'):
     HAS_EPD = True
-    from epd2in7 import EPD
+    from .epd2in7 import EPD
 
 # configs
 FWD = 5
