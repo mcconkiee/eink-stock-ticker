@@ -96,7 +96,7 @@ class TickObject:
         font = ImageFont.truetype(fnt, self.lg_font_size if len(
             msg) <= 3 else int(self.lg_font_size * .75))
         font_sm = ImageFont.truetype(fnt, self.sm_font_size)
-        im = Image.new("L", (self.screen_width, self.screen_height), bg_clr)
+        im = Image.new("L", (self.screen_width, self.screen_height), bg_clr)        
         d = ImageDraw.Draw(im)
         w, h = d.textsize(msg, font=font)
 
@@ -119,6 +119,7 @@ class TickObject:
             if self.rotate_img:
                 im = im.transpose(PIL.Image.ROTATE_180)
             self.epd.display_4Gray(self.epd.getbuffer_4Gray(im))
+        
         return im
 
     def display_symbol(self):
@@ -181,7 +182,7 @@ class TickObject:
         next_width = next_width + self.padding        
         d.text((next_width ,next_height), low, fill=self.color_text,  font=font)
         # create chart
-        chart_img = quickchart(
+        quickchart(
             width=int(self.screen_width/2),
             height=int(self.screen_height/2),
             dataset=history["Open"],
@@ -194,11 +195,12 @@ class TickObject:
         chart = Image.open(os.path.join(
             imgsdir, "chart.png"))  # .convert("RGBA")
         back_im = im.copy()
+        
         if self.rotate_img:
             chart = chart.transpose(PIL.Image.ROTATE_180)
             back_im = back_im.transpose(PIL.Image.ROTATE_180)
-        
-        back_im.paste(chart, (1, 1), mask=chart)
+        chart.putalpha(50)
+        back_im.paste(chart, (1, 1),mask=chart)
         
         back_im.save(os.path.join(imgsdir, "quote.png"), quality=95)
 
