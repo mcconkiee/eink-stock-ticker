@@ -21,7 +21,7 @@ SLEEPTIME = 25
 HAS_EPD = False
 if os.path.exists('/sys/'):
     HAS_EPD = True
-    from epd2in7 import EPD
+    from .epd2in7 import EPD
 
 # configs
 FWD = 5
@@ -164,47 +164,41 @@ class TickObject:
         d = ImageDraw.Draw(im)
         detail_size = 15
         font = ImageFont.truetype(self.font, detail_size)         
-        next_width,next_height = 10,10
+        next_width,next_height = 10,2
         high = f"${self.current_symbol_data.info.get('fiftyTwoWeekHigh')}"
         low = f"${self.current_symbol_data.info.get('fiftyTwoWeekLow')}"
-        # high
-        arrow = Image.open(os.path.join(self.directory_img, "arrow.png")).transpose(PIL.Image.ROTATE_180).resize((detail_size,detail_size))        
-        arrow_x = next_width
-        im.paste(arrow,(next_width, next_height), mask=arrow)
-        next_width = next_width + arrow.size[0] + self.padding        
-        d.text((next_width ,next_height-2), high, fill=self.color_text,  font=font)
+        # postion w anchors https://pillow.readthedocs.io/en/stable/handbook/text-anchors.html
+        d.text((10,15), high, fill=self.color_text,  font=font,anchor="ls")
+        high_box = d.textbbox((10,15), high,  font=font,anchor="ls")
+        d.text((self.screen_width - 10,15), low, fill=self.color_text,  font=font,anchor="rs")
+        low_box = d.textbbox((self.screen_width - 10,15), low,  font=font,anchor="rs")
 
-        # low
-        w_high, h_high = d.textsize(high, font=font)
+        # arrows        
+        arrow = Image.open(os.path.join(self.directory_img, "arrow.png")).transpose(PIL.Image.ROTATE_180).resize((detail_size,detail_size))                
+        im.paste(arrow,(high_box[0] + high_box[2] - 10,high_box[1]-1), mask=arrow)
         arrow = arrow.transpose(PIL.Image.ROTATE_180)
-        next_width = self.screen_width - (w_high + self.padding + arrow.size[0])
-        im.paste(arrow,(next_width - 15, next_height + 3), mask=arrow)
-        next_width = next_width + self.padding        
-        d.text((next_width ,next_height), low, fill=self.color_text,  font=font)
+        im.paste(arrow,(low_box[0] - 15,low_box[1]), mask=arrow)
+       
+        d.line((0,high_box[3] + 5,self.screen_width,high_box[3] + 5), fill=self.color_text)
         # create chart
-        quickchart(
-            width=int(self.screen_width/2),
-            height=int(self.screen_height/2),
-            dataset=history["Open"],
-            background_clr=f"rgb({bg_clr},{bg_clr},{bg_clr})",
-            line_clr=f"rgb({chart_clr},{chart_clr},{chart_clr})",
-            saved_image_path=os.path.join(imgsdir, "chart.png"))
-        # get chart image
-        # flip this image since we want the powersource on the bottom
-
-        chart = Image.open(os.path.join(
-            imgsdir, "chart.png"))  # .convert("RGBA")
-        back_im = im.copy()
-        
+        # quickchart(
+        #     width=int(self.screen_width/2),
+        #     height=int(self.screen_height/2),
+        #     dataset=history["Open"],
+        #     background_clr=f"rgb({bg_clr},{bg_clr},{bg_clr})",
+        #     line_clr=f"rgb({chart_clr},{chart_clr},{chart_clr})",
+        #     saved_image_path=os.path.join(imgsdir, "chart.png"))
+        # # get chart image
+        # # flip this image since we want the powersource on the bottom
+        # chart = Image.open(os.path.join(imgsdir, "chart.png"))
         if self.rotate_img:
-            chart = chart.transpose(PIL.Image.ROTATE_180)
-            back_im = back_im.transpose(PIL.Image.ROTATE_180)
-        chart.putalpha(50)
-        back_im.paste(chart, (1, 1),mask=chart)
+            # chart = chart.transpose(PIL.Image.ROTATE_180)
+            im = back_im.transpose(PIL.Image.ROTATE_180)
+        # chart.putalpha(65)
+        back_im = im.copy()
+        # back_im.paste(chart,mask=chart)
         
         back_im.save(os.path.join(imgsdir, "quote.png"), quality=95)
-
-        back_im.save(os.path.join(imgsdir, f"{symbol}.png"), quality=95)
 
         logging.info(f"Display quote {symbol}")
         if self.epd:
