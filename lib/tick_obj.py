@@ -60,8 +60,9 @@ class TickObject:
     current_symbol_data = None
     directory_font = fontdir
     directory_img = imgsdir
-    def __init__(self) -> None:
-        if HAS_EPD:
+    debug = False
+    def __init__(self,symbols=None) -> None:
+        if HAS_EPD and symbols == None:
             # setup epd
             _epd = EPD()  # get the display
             self.screen_width = _epd.height
@@ -82,7 +83,11 @@ class TickObject:
 
         self.lg_font_size = int(self.screen_height/2)  # large font
         self.sm_font_size = int(self.screen_height/8)  # small font
-        self.symbols = self.get_tickers()
+        if symbols == None:
+            self.symbols = self.get_tickers()
+        else:
+            self.symbols = symbols
+            self.debug = True
     def get_symbol_data(self,symbol:str):
         self.current_symbol_data = get_symbol(symbol=symbol)
         return self.current_symbol_data
@@ -182,24 +187,27 @@ class TickObject:
         next_width = next_width + self.padding        
         d.text((next_width ,next_height-3), low, fill=self.color_text,  font=font)
         # create chart
-        # quickchart(
-        #     width=int(self.screen_width/2),
-        #     height=int(self.screen_height/2),
-        #     dataset=history["Open"],
-        #     background_clr=f"rgb({bg_clr},{bg_clr},{bg_clr})",
-        #     line_clr=f"rgb({chart_clr},{chart_clr},{chart_clr})",
-        #     saved_image_path=os.path.join(imgsdir, "chart.png"))
-        # # get chart image
-        # # flip this image since we want the powersource on the bottom
-        # chart = Image.open(os.path.join(imgsdir, "chart.png"))
+        quickchart(
+            width=int(self.screen_width/2),
+            height=int(self.screen_height/2),
+            dataset=history["Open"],
+            background_clr=f"rgb({bg_clr},{bg_clr},{bg_clr})",
+            line_clr=f"rgb({chart_clr},{chart_clr},{chart_clr})",
+            saved_image_path=os.path.join(imgsdir, "chart.png"))
+        # get chart image
+        # flip this image since we want the powersource on the bottom
+        chart = Image.open(os.path.join(imgsdir, "chart.png"))
         if self.rotate_img:
             # chart = chart.transpose(PIL.Image.ROTATE_180)
             im = back_im.transpose(PIL.Image.ROTATE_180)
         # chart.putalpha(65)
         back_im = im.copy()
-        # back_im.paste(chart,mask=chart)
+        back_im.paste(chart,mask=chart)
         
-        back_im.save(os.path.join(imgsdir, "quote.png"), quality=95)
+        if self.debug:
+            back_im.save(os.path.join(imgsdir, f"{symbol}.png"), quality=95)
+        else:
+            back_im.save(os.path.join(imgsdir, "quote.png"), quality=95)
 
         logging.info(f"Display quote {symbol}")
         if self.epd:
