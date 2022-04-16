@@ -3,9 +3,15 @@ import logging
 from typing import List
 from quickchart import QuickChart
 
-logging.basicConfig(level=logging.INFO)
+
 border_width = 2
 def quickchart(width: int, height: int, dataset: List[float],background_clr:str = "0x000000",line_clr:str = "rgb(240,240,240)",saved_image_path:str=None):
+    # max = 400
+    # limit = len(dataset) - max
+    # if limit > 0:
+    #     logging.debug(f"removing {limit} from dataset of length {len(dataset)}")
+    #     for i in range (limit):
+    #         dataset.pop(0)
     qc = QuickChart()
     qc.width = width
     qc.height = height

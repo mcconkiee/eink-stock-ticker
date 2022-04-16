@@ -5,5 +5,9 @@ from lib.ticker_details import TickerDetails
 # logging.info(f"details = {t.current_symbol_data}")
 # t.refresh()
 from lib.tick import Tick
-t = Tick()
-t.tick()
+
+# standard loop for device 
+# t = Tick().tick()
+
+# Manual to not print to screen and save symbol data locally: eg: when debugging
+t = Tick(symbols=["SPY"]).tick()

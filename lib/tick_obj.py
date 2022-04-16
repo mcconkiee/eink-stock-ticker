@@ -41,7 +41,6 @@ class TickObject:
     btn2 = None
     btn3 = None
     btn4 = None
-    logging.basicConfig(level=logging.INFO)
     symbols: list[str] = []
 
     # these are flipped on purpose
@@ -133,7 +132,7 @@ class TickObject:
         orig_symbol = symbol.replace("^", "")
 
         history = get_history(symbol=symbol)
-
+        logging.debug(f"history size {len(history)} & data for symbol = {history}")
         # remove the karat if we have one (eg ^VIX)
         symbol = orig_symbol
         # print(f"SYMBOL: {json.dumps(quote.info)}")
