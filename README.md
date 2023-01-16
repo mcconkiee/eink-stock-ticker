@@ -16,10 +16,21 @@ This is my first go at a display on a raspberry pi. The goal is to display a rea
 ```
 mkvirtualenv -p python3.9 vix
 workon vix
+
+# or
+
+python3 -m venv ~/Documents/venv/eink
+source ~/Documents/venv/eink/bin/activate
+
+# then install
 pip install -r requirements.txt
-python3 ./drawing.py && open imgs/quote.png
+python3 ./main.py && open imgs/quote.png
 pip uninstall pandas
 pip install pandas==1.3.5
+
+
+
+
 ```
 
 ### Chron
